@@ -1,0 +1,12 @@
+html {
+	cursor: default;
+	font-family: Arial;
+	user-select: none;
+	font-size: 12px;
+	background-color: #000;
+}
+
+body,
+body * {
+	box-sizing: border-box;
+}
