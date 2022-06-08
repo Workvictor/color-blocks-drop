@@ -1,9 +1,7 @@
 {
-  "name": "you-paint",
-  "productName": "you paint",
-  "version": "0.0.1",
-  "description": "paint sofware",
-  "main": "main.js",
+  "name": "color-blocks-drop",
+  "version": "0.1.0",
+  "description": "color blocks game",
   "scripts": {
     "watch": "webpack serve --open",
     "build": "webpack --config webpack.prod.js",

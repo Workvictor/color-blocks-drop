@@ -1,30 +1,20 @@
-export class Matrix<T> extends Array<T[]> {
-  $each = (cb: (value: T, row: number, col: number) => void) => {
-    const context = this;
-    const length = context.length;
-    for (let row = 0; row < length; row++) {
-      for (let col = 0; col < length; col++) {
-        cb(this[row][col], row, col);
-      }
-    }
-  };
+export const matrix_clone = (matrix: number[][]) => matrix.map(data => data.slice());
 
-  $rotate = (dir = 1) => {
-    if (dir === 0) return;
-    const context = this;
-    const length = context.length;
-    for (let row = 0; row < length; ++row) {
-      for (let col = 0; col < row; ++col) {
-        [context[col][row], context[row][col]] = [context[row][col], context[col][row]];
-      }
+export const matrix_rotate = (matrix: number[][], dir: number) => {
+  if (dir === 0) return;
+  //
+  const length = matrix.length;
+  for (let row = 0; row < length; ++row) {
+    for (let col = 0; col < row; ++col) {
+      [matrix[col][row], matrix[row][col]] = [matrix[row][col], matrix[col][row]];
     }
-    if (dir > 0) {
-      for (let row = 0; row < length; row++) {
-        context[row].reverse();
-      }
+  }
+  if (dir > 0) {
+    for (let row = 0; row < length; row++) {
+      matrix[row].reverse();
     }
-    if (dir < 0) {
-      context.reverse();
-    }
-  };
-}
+  }
+  if (dir < 0) {
+    matrix.reverse();
+  }
+};

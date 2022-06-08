@@ -42,11 +42,12 @@ export const head = make_element('head');
 export const style = make_element('style');
 export const slot = make_element('slot');
 export const canvas = make_element('canvas');
-export const canvasCTX = (w = 64, h = 64) => {
+export const ctx2d = (w = 64, h?: number) => {
   const ctx = canvas().getContext('2d');
   if (ctx) {
     ctx.canvas.width = w;
-    ctx.canvas.height = h;
+    ctx.canvas.height = h || w;
+    ctx.imageSmoothingEnabled = false;
   }
   return ctx;
 };

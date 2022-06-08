@@ -1,67 +1,53 @@
 import { css, set_global_style } from '../utils/css';
-import { HSLA } from '../utils/hsla';
+import { hsla } from '../utils/hsla';
 import { get_var_token } from '../utils/token';
 
 const unit_sec = (value: number) => `${value}s`;
 const brightness = (value: number) => `brightness(${value}%)`;
 
 const prop_map: string[][] = [];
-const define_prop = (value: string | HSLA) => {
+const define_prop = (value: string) => {
   const key = get_var_token();
-  if (value instanceof HSLA) {
-    value = value.$value;
-  }
   prop_map.push([key, value]);
   return key;
 };
 
 const style_var = {
-  color_gray_0: define_prop(new HSLA(0, 0, 0)),
-  color_gray_2: define_prop(new HSLA(0, 0, 2)),
-  color_gray_4: define_prop(new HSLA(0, 0, 4)),
-  color_gray_6: define_prop(new HSLA(0, 0, 6)),
-  color_gray_8: define_prop(new HSLA(0, 0, 8)),
-  color_gray_12: define_prop(new HSLA(0, 0, 12)),
-  color_gray_16: define_prop(new HSLA(0, 0, 16)),
-  color_gray_24: define_prop(new HSLA(0, 0, 24)),
-  color_gray_32: define_prop(new HSLA(0, 0, 32)),
-  color_gray_40: define_prop(new HSLA(0, 0, 40)),
-  color_gray_54: define_prop(new HSLA(0, 0, 54)),
-  color_gray_72: define_prop(new HSLA(0, 0, 72)),
+  color_gray_0: define_prop(hsla(0, 0, 0)),
+  color_gray_2: define_prop(hsla(0, 0, 2)),
+  color_gray_4: define_prop(hsla(0, 0, 4)),
+  color_gray_6: define_prop(hsla(0, 0, 6)),
+  color_gray_8: define_prop(hsla(0, 0, 8)),
+  color_gray_12: define_prop(hsla(0, 0, 12)),
+  color_gray_16: define_prop(hsla(0, 0, 16)),
+  color_gray_24: define_prop(hsla(0, 0, 24)),
+  color_gray_32: define_prop(hsla(0, 0, 32)),
+  color_gray_40: define_prop(hsla(0, 0, 40)),
+  color_gray_54: define_prop(hsla(0, 0, 54)),
+  color_gray_72: define_prop(hsla(0, 0, 72)),
 
-  color_common: define_prop(new HSLA(60, 17, 75)),
-  color_common_light: define_prop(new HSLA(60, 29, 84)),
-  color_common_dark: define_prop(new HSLA(60, 9, 50)),
+  color_white: define_prop(hsla(0, 0, 100)),
 
-  color_dimmer: define_prop(new HSLA(0, 0, 0, 0.75)),
-  color_highlighter: define_prop(new HSLA(0, 0, 72, 0.3)),
+  color_common: define_prop(hsla(60, 17, 75)),
+  color_common_light: define_prop(hsla(60, 29, 84)),
+  color_common_dark: define_prop(hsla(60, 9, 50)),
 
-  color_accent: define_prop(new HSLA(43, 74, 49)),
+  color_dimmer: define_prop(hsla(0, 0, 0, 0.75)),
+  color_highlighter: define_prop(hsla(0, 0, 72, 0.3)),
 
-  color_primary: define_prop(new HSLA(0, 100, 27)),
-  color_primary_dark: define_prop(new HSLA(0, 100, 10)),
-  color_primary_active: define_prop(new HSLA(0, 100, 67)),
+  color_accent: define_prop(hsla(43, 74, 49)),
 
-  color_success: define_prop(new HSLA(118, 71, 27)),
-  color_success_dark: define_prop(new HSLA(118, 71, 10)),
-  color_success_active: define_prop(new HSLA(118, 57, 76)),
+  color_primary: define_prop(hsla(0, 100, 27)),
+  color_primary_dark: define_prop(hsla(0, 100, 10)),
+  color_primary_active: define_prop(hsla(0, 100, 67)),
 
-  color_sucondary: define_prop(new HSLA(200, 80, 35)),
-  color_sucondary_dark: define_prop(new HSLA(200, 45, 30)),
-  color_sucondary_active: define_prop(new HSLA(193, 39, 12)),
+  color_success: define_prop(hsla(118, 71, 27)),
+  color_success_dark: define_prop(hsla(118, 71, 10)),
+  color_success_active: define_prop(hsla(118, 57, 76)),
 
-  color_shape_T: define_prop(new HSLA(0, 92, 38)),
-  color_shape_L: define_prop(new HSLA(319, 81, 34)),
-  color_shape_J: define_prop(new HSLA(269, 56, 34)),
-  color_shape_S: define_prop(new HSLA(253, 79, 49)),
-  color_shape_Z: define_prop(new HSLA(228, 46, 30)),
-  color_shape_O: define_prop(new HSLA(188, 76, 42)),
-  color_shape_I: define_prop(new HSLA(150, 86, 39)),
-  color_shape_U: define_prop(new HSLA(133, 75, 75)),
-  color_shape_H: define_prop(new HSLA(122, 75, 45)),
-  color_shape_Pl: define_prop(new HSLA(82, 72, 40)),
-  color_shape_Om: define_prop(new HSLA(37, 71, 51)),
-  color_shape_Mn: define_prop(new HSLA(57, 90, 40)),
+  color_sucondary: define_prop(hsla(200, 80, 35)),
+  color_sucondary_dark: define_prop(hsla(200, 45, 30)),
+  color_sucondary_active: define_prop(hsla(193, 39, 12)),
 
   transition_xs: define_prop(unit_sec(0.025)),
   transition_sm: define_prop(unit_sec(0.075)),

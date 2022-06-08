@@ -1,6 +1,6 @@
 export const raf = requestAnimationFrame;
 
-export const raf_timer = (cb: () => void, drop_timeout = 500) => {
+export const raf_timeout = (cb: () => void, drop_timeout = 500) => {
   let drop_time = Date.now();
   const loop = () => {
     raf(loop);
