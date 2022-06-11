@@ -72,6 +72,12 @@ export class gui_app extends gui_element {
 
     self.$custom.$append(new gui_title_scene());
     self.$custom.$append(game_ctx.canvas);
+
+		document.title = app_title;
+
+    if (dev_mode) {
+      document.title = `dev_mode: ${app_ver} ${app_title}`;
+    }
   }
 }
 

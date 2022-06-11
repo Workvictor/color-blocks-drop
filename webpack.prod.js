@@ -1,3 +1,4 @@
+const webpack = require('webpack');
 const TerserPlugin = require('terser-webpack-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const config = require('./webpack.config');
@@ -14,6 +15,14 @@ config.module.rules[0].options = {
   transpileOnly: true,
   getCustomTransformers: () => ({ after: [styledComponentsTransformer] }),
 };
+
+config.plugins.splice(
+  0,
+  1,
+  new webpack.DefinePlugin({
+    dev_mode: JSON.stringify(false),
+  })
+);
 
 const common = {
   mode,
