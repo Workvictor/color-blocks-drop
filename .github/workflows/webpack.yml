@@ -1,4 +1,4 @@
-name: NodeJS with Webpack
+name: Lint
 
 on:
   push:
@@ -22,8 +22,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Build
+    - name: Lint
       run: |
         yarn
-        yarn build
-        npx gh-pages -d dist
+        yarn lint
