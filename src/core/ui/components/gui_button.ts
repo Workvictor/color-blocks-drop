@@ -23,7 +23,7 @@ export class gui_button extends gui_element {
         color: ${use_style_var(i => i.color_gray_72)};
         border: none;
         height: auto;
-        padding: 4px 8px;
+        padding: 0.5rem 1rem;
         filter: var(--ftr-norm);
         transform: translateY(-2px);
         will-change: contents;

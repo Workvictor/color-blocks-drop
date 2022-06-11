@@ -62,7 +62,7 @@ const custom_props_v2 = <T extends HTMLElement>(context: T) => {
     id && context.setAttribute('gui-id', id);
   };
 
-  const $on_click = context.onclick;
+  const $on_click = (cb: () => void) => (context.onclick = cb);
 
   const $append = (...nodes: App.Children) => {
     context.append(...stringify_children(nodes));
@@ -107,6 +107,7 @@ const custom_props_v2 = <T extends HTMLElement>(context: T) => {
     $head,
     $slot,
     $id,
+    $set_style,
     $on_click,
     $append,
     $set_width,
@@ -148,13 +149,6 @@ export class gui_element extends HTMLElement {
 
     self.$custom.$id(elementNameMap.get(self.tagName.toLowerCase()));
   }
-
-  /** create style node and returns it */
-  // $style = (...p: Parameters<typeof create_style_node>) => {
-  //   const el = create_style_node(...p);
-  //   this.$custom.$head.append(el);
-  //   return el;
-  // };
 }
 
 interface GuiElementConstructor {
