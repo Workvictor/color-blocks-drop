@@ -1,5 +1,7 @@
 import { css } from './css';
-import { Observer } from './observer';
+import { css_value_str } from './css_rule';
+import { map } from './map_util';
+import { observer } from './observer';
 
 declare global {
   namespace App {
@@ -9,20 +11,12 @@ declare global {
 
 const not_nullish = <T>(value: T) => value !== null && value !== undefined;
 
-export const stringify_children = (children: App.Children) => {
-  const result: (string | Node)[] = [];
+let to_html_string = (child: any) => (not_nullish(child) ? String(child) : '');
 
-  for (let i = 0; i < children.length; i++) {
-    if (not_nullish(children[i])) {
-      if (children[i] instanceof Node) {
-        result.push(children[i] as Node);
-        continue;
-      }
-      result.push(String(children[i]));
-    }
-  }
+let is_node = (child: any): child is Node => (child as Node) && true;
 
-  return result;
+export let stringify_children = (children: App.Children) => {
+  return children.map(child => (is_node(child) ? child : to_html_string(child)));
 };
 
 function make_element<K extends keyof HTMLElementTagNameMap>(tagName: K) {
@@ -52,7 +46,7 @@ export const ctx2d = (w = 64, h?: number) => {
   return ctx;
 };
 
-const elementNameMap = new Map<string, string>();
+const elementNameMap = map<string, string>();
 
 export const unitPX = (value: number) => `${value}px`;
 export const unitPC = (value: number) => `${value}%`;
@@ -60,81 +54,107 @@ export const unitEM = (value: number) => `${value}em`;
 
 type UnitFunction = typeof unitPX | typeof unitPC | typeof unitEM;
 
-class custom_props<T extends HTMLElement> {
-  $connected = new Observer(false);
-  $head = head();
-  $slot = slot();
-  $name = '';
+const custom_props_v2 = <T extends HTMLElement>(context: T) => {
+  const $connected = observer(false);
+  const $head = head();
+  const $slot = slot();
+  const $id = (id?: string) => {
+    id && context.setAttribute('gui-id', id);
+  };
 
-  constructor(private context: T) {}
+  const $on_click = context.onclick;
 
-  $on_click(cb: () => void) {
-    this.context.onclick = cb;
-  }
+  const $append = (...nodes: App.Children) => {
+    context.append(...stringify_children(nodes));
+  };
 
-  $append(...nodes: App.Children) {
-    this.context.append(...stringify_children(nodes));
-  }
+  const $set_style = (cssText: string) => {
+    context.style.cssText = cssText;
+  };
 
-  $setStyle(cssText: string) {
-    this.context.style.cssText = cssText;
-  }
+  const $set_width = (width: number, unit: UnitFunction = unitPX) => {
+    context.style.width = unit(width);
+  };
 
-  $set_width(width: number, unit: UnitFunction = unitPX) {
-    this.context.style.width = unit(width);
-  }
+  const $set_transform_translate = (x: number, y: number, unit: UnitFunction = unitPX) => {
+    context.style.transform = `translate(${unit(x)},${unit(y)})`;
+  };
 
-  $set_transform_translate(x: number, y: number, unit: UnitFunction = unitPX) {
-    this.context.style.transform = `translate(${unit(x)},${unit(y)})`;
-  }
+  const $head_append = <T extends Node>(n: T) => $head.appendChild(n);
 
-  private $head_append = <T extends Node>(n: T) => this.$head.appendChild(n);
+  const $add_css = (cssStyle: string) => $head_append(style([cssStyle]));
 
-  $add_css(cssStyle: string) {
-    return this.$head_append(style([cssStyle]));
-  }
+  const $add_host_css = (cssStyle: string) => $head_append(style([`:host{${cssStyle}}`]));
 
-  $add_host_css(cssStyle: string) {
-    return this.$head_append(style([`:host{${cssStyle}}`]));
-  }
+  const $inject_css = (inject: (mapper: typeof css) => ReturnType<typeof css>) => $head_append(style([inject(css)]));
 
-  $inject_css(inject: (mapper: typeof css) => ReturnType<typeof css>) {
-    return this.$head_append(style([inject(css)]));
-  }
+  const $toggle_style = (styleElem: HTMLStyleElement, active: boolean) => {
+    if (!context.shadowRoot?.styleSheets) return;
+    const styleElementInSheet = Array.from(context.shadowRoot.styleSheets).find(i => i.ownerNode === styleElem);
+    if (styleElementInSheet) {
+      styleElementInSheet.disabled = !active;
+    }
+  };
 
-  $toggle_style(styleElem: HTMLStyleElement, active: boolean) {
-    if (!this.context.shadowRoot) return;
-    if (!this.context.shadowRoot.styleSheets) return;
-    const styleElementInSheet = Array.from(this.context.shadowRoot.styleSheets).find(i => i.ownerNode === styleElem);
-    if (!styleElementInSheet) return;
-    styleElementInSheet.disabled = !active;
-  }
+  const $style = (...p: Parameters<typeof css_value_str>) => $head_append(style([css_value_str(...p)]));
+
+  const $style_inline = (...p: Parameters<typeof css_value_str>) => {
+    $set_style(css_value_str(...p));
+  };
+
+  return {
+    $connected,
+    $head,
+    $slot,
+    $id,
+    $on_click,
+    $append,
+    $set_width,
+    $set_transform_translate,
+    $head_append,
+    $add_css,
+    $add_host_css,
+    $inject_css,
+    $toggle_style,
+    $style,
+    $style_inline,
+  };
+};
+class TCustomPropsWrap<T extends HTMLElement> {
+  0 = (v: T) => custom_props_v2(v);
 }
 
 export class gui_element extends HTMLElement {
-  connectedCallback() {
-    this.$custom.$connected.$set(true);
-  }
+  disconnectedCallback!: () => void;
+  connectedCallback!: () => void;
 
-  disconnectedCallback() {
-    this.$custom.$connected.$set(false);
-  }
-
-  $custom = new custom_props(this);
+  $custom!: ReturnType<TCustomPropsWrap<gui_element>[0]>;
 
   constructor(...nodes: App.Children) {
     super();
-    const root = this.attachShadow({ mode: 'open' });
-    root.append(this.$custom.$head, this.$custom.$slot);
-    this.$custom.$append(...nodes);
+    const self = this;
+    const root = self.attachShadow({ mode: 'open' });
 
-    this.$custom.$add_host_css(css`
+    self.$custom = custom_props_v2(self);
+
+    root.append(self.$custom.$head, self.$custom.$slot);
+    self.$custom.$append(...nodes);
+    self.$custom.$add_host_css(css`
       display: block;
     `);
 
-    const constructorName = elementNameMap.get(this.tagName.toLowerCase()) + this.$custom.$name;
-    this.setAttribute('gui-name', constructorName);
+    self.disconnectedCallback = () => self.$custom.$connected.$set(false);
+    self.connectedCallback = () => self.$custom.$connected.$set(true);
+
+    self.$custom.$id(elementNameMap.get(self.tagName.toLowerCase()));
   }
+
+  /** create style node and returns it */
+  // $style = (...p: Parameters<typeof create_style_node>) => {
+  //   const el = create_style_node(...p);
+  //   this.$custom.$head.append(el);
+  //   return el;
+  // };
 }
 
 interface GuiElementConstructor {
@@ -143,16 +163,11 @@ interface GuiElementConstructor {
 
 const element_constructor =
   (id = 0, name_constructor = () => `ui-${id++}`) =>
-  <T extends GuiElementConstructor>(element_class: T, name = name_constructor()) => {
-    elementNameMap.set(name, element_class.name);
+  <T extends GuiElementConstructor>(element_class: T, debug_id = '', name = name_constructor()) => {
+    elementNameMap.set(name, debug_id || element_class.name);
     customElements.define(name, element_class);
   };
 
 export const define_element = element_constructor();
 
 define_element(gui_element);
-
-export const element_class_factory =
-  <T extends GuiElementConstructor>(element: T) =>
-  (...params: ConstructorParameters<typeof element>) =>
-    new element(...params);

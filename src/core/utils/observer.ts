@@ -1,24 +1,24 @@
+import { array_each } from './array_utils';
+
 export type Subscriber<T> = (value: T) => void;
 
-export class Observer<T> {
-  private subscribers: Subscriber<T>[] = [];
-  private unsub_queue: Subscriber<T>[] = [];
-  constructor(private $value: T) {}
+export const observer = <T>(value: T) => {
+  const subscribers: Subscriber<T>[] = [];
+  const unsub_queue: Subscriber<T>[] = [];
 
-  $subscribe = (subscriber: Subscriber<T>) => {
-    this.subscribers.push(subscriber);
+  const $subscribe = (subscriber: Subscriber<T>) => {
+    subscribers.push(subscriber);
     return {
-      unsubscribe: () => {
-        this.unsub_queue.push(subscriber);
+      $unsubscribe: () => {
+        unsub_queue.push(subscriber);
       },
     };
   };
 
-  $broadcast = () => {
-		const {subscribers, $value, unsub_queue} = this;
-    subscribers.forEach(sub => sub($value));
+  const $broadcast = () => {
+    array_each(subscribers, sub => sub(value));
     if (unsub_queue.length > 0) {
-      unsub_queue.forEach(subscriber => {
+      array_each(unsub_queue, subscriber => {
         const index = subscribers.indexOf(subscriber);
         if (index >= 0) {
           subscribers.splice(index, 1);
@@ -28,24 +28,38 @@ export class Observer<T> {
     }
   };
 
-  $set = (setter: ((prev: T) => T) | T) => {
-    if (setter instanceof Function) {
-      this.$value = setter(this.$value);
-      this.$broadcast();
-      return;
-    }
-    this.$value = setter;
-    this.$broadcast();
+  const $set = (setter: T) => {
+    value = setter;
+    $broadcast();
   };
 
-  $get = () => {
-    return this.$value;
-  };
+  const $set_f = (setter: (prev: T) => T) => $set(setter(value));
 
-  $once = (subscriber: Subscriber<T>) => {
-    const call = this.$subscribe(v => {
+  const $get = () => value;
+
+  const $once = (subscriber: Subscriber<T>) => {
+    const call = $subscribe(v => {
       subscriber(v);
-      call.unsubscribe();
+      call.$unsubscribe();
     });
   };
+
+  return {
+    //
+    $subscribe,
+    $broadcast,
+    $set,
+    $get,
+    $set_f,
+    $once,
+    get v() {
+      return value;
+    },
+  };
+};
+
+class Wrap<T> {
+  0 = (v: T) => observer(v);
 }
+
+export type TObserver<T> = ReturnType<Wrap<T>[0]>;

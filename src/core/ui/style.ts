@@ -78,7 +78,7 @@ set_global_style(css`
   }
 
   body {
-    background-color: ${use_style_var(i => i.color_gray_2)};
+    background-color: ${use_style_var(i => i.color_gray_8)};
     color: ${use_style_var(i => i.color_gray_24)};
     position: fixed;
     top: 0;

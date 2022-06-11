@@ -1,7 +1,10 @@
-export const use_memo = <T>(fn: (...args: T[]) => void, prev: T[]) => {
-  return (...args: T[]) => {
-    let isChanged = false;		
-    args.forEach((val, ind) => {
+import { array_each } from './array_utils';
+
+export const use_memo =
+  <T>(fn: (...args: T[]) => void, prev: T[]) =>
+  (...args: T[]) => {
+    let isChanged = false;
+    array_each(args, (val, ind) => {
       isChanged = val !== prev[ind];
       val = prev[ind];
     });
@@ -10,4 +13,3 @@ export const use_memo = <T>(fn: (...args: T[]) => void, prev: T[]) => {
       isChanged = false;
     }
   };
-};

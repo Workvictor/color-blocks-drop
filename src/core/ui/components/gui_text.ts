@@ -3,7 +3,7 @@ import { span } from 'src/core/utils/element';
 
 export function gui_text(getter: (data: text_data_type) => string, fabric = span) {
   const elem = fabric();
-  const locale: text_locale_key = 'RU';
+  const locale: text_locale_key = 'en';
   elem.textContent = getter(text_data[locale]);
   return elem;
 }

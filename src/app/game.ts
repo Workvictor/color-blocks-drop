@@ -1,54 +1,26 @@
 import { raf } from 'src/core/utils/raf';
-import { conf_game_scale, conf_get_game_height, conf_get_game_width } from './game_config';
-import { grid_draw } from './grid';
-import { shape_draw, shape_randomize, shape_update } from './shape';
+import { event_game_start, gs_update_timeout, gs_is_running, event_game_update, event_game_draw, gs_is_animating, event_shape_drop, event_animate_merge_stop } from './game_state';
+import { shape_init } from './shape';
 import { game_input_init } from './game_input';
-import { ctx2d } from 'src/core/utils/element';
+import { timer } from 'src/core/utils/timer';
 
-const game_ctx = ctx2d(conf_get_game_width() * conf_game_scale, conf_get_game_height() * conf_game_scale)!;
+export const game_init = () => {
+  const time_to_update = timer(gs_update_timeout.v);
 
-let stop_game = false;
-let stop_update_loop = false;
-let drop_timeout = 1000;
-let drop_time = drop_timeout;
+  const loop = () => {
+    raf(loop);
 
-const update_loop = (time_now: number) => {
-  raf(update_loop);
+    if (gs_is_running() && time_to_update()) event_game_update.$broadcast();
 
-  if (stop_game || stop_update_loop || drop_time > time_now) return;
-  drop_time = time_now + drop_timeout;
+    if (gs_is_animating()) event_game_draw.$broadcast();
+  };
 
-  shape_update();
-};
+  event_shape_drop.$subscribe(() => time_to_update(performance.now() + gs_update_timeout.v));
+  event_animate_merge_stop.$subscribe(() => time_to_update(performance.now() + gs_update_timeout.v));
 
-const animation_loop = () => {
-  raf(animation_loop);
-
-  if (stop_game) return;
-
-  grid_draw(game_ctx);
-  shape_draw(game_ctx);
-};
-
-export const game_stop_update = (state: boolean) => {
-  stop_update_loop = state;
-};
-
-export const game_stop = () => {
-  stop_game = true;
-  grid_draw(game_ctx);
-};
-
-export const game_start = () => {
   game_input_init();
-  shape_randomize();
-  [update_loop, animation_loop].map(raf);
-};
+  shape_init();
+  raf(loop);
 
-export const game_is_paused = () => stop_game || stop_update_loop;
-
-export const game_set_ctx = (root: HTMLElement) => {
-	root.appendChild(game_ctx.canvas)
-  game_ctx.scale(conf_game_scale, conf_game_scale);
-  game_ctx.imageSmoothingEnabled = false;
+  event_game_start.$broadcast();
 };

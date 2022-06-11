@@ -1,6 +1,7 @@
+import { array_each } from 'src/core/utils/array_utils';
 import { ctx2d } from 'src/core/utils/element';
 import { hsla } from 'src/core/utils/hsla';
-import { conf_block_size } from './game_config';
+import { conf_block_size } from './game_state';
 
 const i = conf_block_size;
 const output_ctx = ctx2d(i)!;
@@ -30,11 +31,11 @@ const border_points = [
   ],
 ];
 
-border_points.forEach((border, ind) => {
+array_each(border_points, (border, ind) => {
   pattern.fillStyle = border_color[ind];
   pattern.beginPath();
   pattern.moveTo(center, center);
-  border.forEach(([x, y]) => {
+  array_each(border, ([x, y]) => {
     pattern.lineTo(x, y);
   });
   pattern.lineTo(center, center);
@@ -46,7 +47,7 @@ output_ctx.lineWidth = 8;
 output_ctx.miterLimit = 10;
 output_ctx.strokeStyle = pattern.createPattern(pattern.canvas, 'no-repeat')!;
 output_ctx.moveTo(0, i);
-[...border_points[0], ...border_points[3]].forEach(([x, y]) => {
+array_each([...border_points[0], ...border_points[3]], ([x, y]) => {
   output_ctx.lineTo(x, y);
 });
 output_ctx.stroke();

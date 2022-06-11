@@ -4,11 +4,11 @@ import { gui_popup } from './gui_popup';
 import { gui_block } from './gui_block';
 import { gui_button } from './gui_button';
 import { gui_button_grid } from './gui_button_grid';
-import { Observer } from 'src/core/utils/observer';
 import { gui_text } from './gui_text';
 import { gui_button_primary } from './gui_button_primary';
 import { gui_button_success } from './gui_button_success';
 import { use_style_var } from 'src/core/ui/style';
+import { TObserver } from 'src/core/utils/observer';
 
 export class gui_modal extends gui_popup {
   $header = new gui_block();
@@ -20,7 +20,7 @@ export class gui_modal extends gui_popup {
   $ok_btn = new gui_button_success(gui_text(i => i['txt-1']));
   $cancel_btn = new gui_button(gui_text(i => i['txt-2']));
 
-  constructor(public $visibility: Observer<boolean>, ...nodes: App.Children) {
+  constructor(public $visibility: TObserver<boolean>, ...nodes: App.Children) {
     super();
 
     this.$visibility.$subscribe(visible => {
@@ -33,7 +33,7 @@ export class gui_modal extends gui_popup {
       transform: translate(-50%, -50%);
       padding: 0;
       border: 2px solid ${use_style_var(i => i.color_gray_2)};
-			width: 220px;
+      width: 220px;
     `);
     this.$header.$custom.$add_host_css(css`
       display: flex;
@@ -56,12 +56,12 @@ export class gui_modal extends gui_popup {
       margin: -2px -2px 0 0;
     `);
 
-    this.$close_btn.$custom.$on_click(() => {
+    this.$close_btn.$custom.$on_click = () => {
       this.$visibility.$set(false);
-    });
-    this.$cancel_btn.$custom.$on_click(() => {
+    };
+    this.$cancel_btn.$custom.$on_click = () => {
       this.$visibility.$set(false);
-    });
+    };
     const cancel_btn_cnt = new gui_button_grid(this.$cancel_btn);
     const ok_btn_cnt = new gui_button_grid(this.$ok_btn);
 
